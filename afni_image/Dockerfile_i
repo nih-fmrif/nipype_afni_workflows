@@ -52,6 +52,7 @@ RUN apt-get update -qq \
                         libjpeg62 xvfb xterm vim curl  \
                         libglu1-mesa-dev libglw1-mesa     \
                         libxm4 build-essential 
+RUN /bin/bash -c ". activate default && conda install jupyter tmux paramiko"
 
 RUN curl -O https://afni.nimh.nih.gov/pub/dist/bin/linux_ubuntu_16_64/@update.afni.binaries \
     && tcsh @update.afni.binaries -package linux_ubuntu_16_64  -do_extras 
@@ -67,11 +68,17 @@ RUN export R_LIBS=$HOME/R \
     && rPkgsInstall -pkgs ALL 
 
 # Configure AFNI environment and make a place for the tutorial data to land
-RUN . ~/.bashrc \ 
+RUN apt-get install -yq --no-install-recommends locales \
+    && . ~/.bashrc \ 
     && cp $HOME/abin/AFNI.afnirc $HOME/.afnirc \
     && suma -update_env \
-    && mkdir ~\CD
-VOLUME ~\CD
+    && mkdir ~\CD \
+    && locale-gen en_US.UTF-8
+
+ENV SHELL=/bin/bash
+RUN rm /bin/sh && ln -sf /bin/bash /bin/sh; 
+VOLUME ~/CD
+VOLUME ~/code
 #--------------------------
 # User-defined instructions
 #--------------------------
